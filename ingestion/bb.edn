@@ -1,0 +1,3 @@
+{:deps {djblue/portal {:mvn/version "0.57.1"}}
+ :tasks {hello {:doc "Says hello"
+                :task (shell "echo \"Hello world!\"")}}}
