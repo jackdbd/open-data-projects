@@ -1,6 +1,11 @@
 # NYC 311
 
-## References
+This project can be managed with a few [Babashka tasks](https://book.babashka.org/#tasks).
 
-- [311 Service Requests from 2010 to Present](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9/) dataset.
-- [data dictionary](https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx)
+Data ingestion performed by [dlt](https://github.com/dlt-hub/dlt).
+
+Define `created_date_start` and `created_date_stop` in the `[sources.socrata]` section of `config.toml`, then run the dlt pipeline using this Babashka task:
+
+```sh
+bb run ingest
+```

@@ -1,0 +1,15 @@
+[runtime]
+dlthub_telemetry = true
+# https://dlthub.com/devel/dlt-ecosystem/verified-sources/rest_api#troubleshooting
+log_level = "INFO"
+# https://dlthub.com/docs/general-usage/http/rest-client#retry
+request_backoff_factor = 1.5
+
+[sources.socrata]
+created_date_start = "2011-01-01"
+created_date_stop = "2012-01-01"
+# when fetching from 2010-01-01 to 2011-01-01, we get some results if offset is
+# LESS than 2_090_710. When we set offset>=2_090_710, we get no results.
+
+[telegram.config]
+parse_mode = "HTML"
