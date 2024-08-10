@@ -1,0 +1,53 @@
+version: 2
+
+sources:
+  - name: nyc_open_data
+    description: >
+      Various datasets found on the [NYC Open Data portal](https://opendata.cityofnewyork.us/).
+    database: nyc_open_data
+    schema: landing_zone
+    meta:
+      contains_pii: false
+      owner: "@giacomo"
+    tags:
+      - nyc
+      - bronze
+      - raw
+    tables:
+      - name: service_requests_311
+        description: >
+          NYC Open Data dataset [311 Service Requests from 2010 to Present](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9/about_data).
+        identifier: service_requests_311
+        loader: dlt
+        loaded_at_field: ingested_at
+        columns:
+          - name: unique_key
+            description: The primary key for this table.
+            data_tests:
+              - not_null
+              - unique
+        tags:
+          - '311'
+          - complaint
+      - name: film_permits
+        description: >
+          NYC Open Data dataset [Film Permits](https://data.cityofnewyork.us/City-Government/Film-Permits/tg4x-b46p/about_data).
+        identifier: film_permits
+        loader: dlt
+        loaded_at_field: ingested_at
+        columns:
+          - name: eventid
+            description: The unique ID of a film permit.
+        tags:
+          - film
+          - movie
+      - name: staten_island_ferry_ridership_counts
+        description: >
+          NYC Open Data dataset [Staten Island Ferry Ridership Counts](https://data.cityofnewyork.us/Transportation/Staten-Island-Ferry-Ridership-Counts/6eng-46dm/about_data).
+        identifier: staten_island_ferry_ridership_counts
+        loader: dlt
+        loaded_at_field: ingested_at
+        columns:
+          - name: date
+        tags:
+          - ferry

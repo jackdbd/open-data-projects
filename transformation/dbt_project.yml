@@ -1,0 +1,22 @@
+name: 'nyc_open_data'
+profile: 'nyc_open_data' # ~/.dbt/profiles.yml
+version: '1.0.0'
+
+analysis-paths: ["analyses"]
+macro-paths: ["macros"]
+model-paths: ["models"]
+seed-paths: ["seeds"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+
+# directories to be removed by `dbt clean`
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  nyc_open_data:
+    staging:
+      +database: nyc_open_data
+      +schema: silver_layer
+      +materialized: table

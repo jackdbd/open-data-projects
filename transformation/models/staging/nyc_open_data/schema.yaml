@@ -1,0 +1,36 @@
+
+version: 2
+
+models:
+  - name: cleaned_service_requests_311
+    description: >
+      The cleaned 311 service requests made by New Yorkers.
+    config:
+      materialized: table
+    meta:
+      contains_pii: false
+      owner: "@giacomo"
+    tags:
+      - '311'
+      - complaint
+      - nyc
+      - silver
+    columns:
+      - name: unique_key
+        description: The primary key for this table.
+        data_tests:
+          - not_null
+          - unique
+      - name: created_date
+        data_tests:
+          - not_null
+      - name: agency
+        description: >
+          The NYC agency that received a complaint from a New Yorker.
+        data_tests:
+          - not_null
+          # - accepted_values:
+          #     values:
+          #       - ACS
+          #       - DOT
+          #       - NYPD
