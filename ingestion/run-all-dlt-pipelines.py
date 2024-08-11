@@ -5,8 +5,17 @@ from loguru import logger
 from socrata import nyc_open_data_source
 from dlt.common.configuration.inject import with_config
 from dlt.common.pipeline import LoadInfo
+from dlt.common.configuration.exceptions import ConfigFieldMissingException
 from dlt.pipeline.exceptions import PipelineStepFailed
-from notifications import safe_send_telegram_text
+from notifications import (
+    load_info_text,
+    runtime_configuration_text,
+    safe_send_telegram_text,
+    schema_update_text,
+    pipeline_step_failed_text,
+    config_field_missing_exception_text,
+    table_schema_update_text,
+)
 
 repo_root = os.path.abspath(os.path.join(__file__, "..", ".."))
 data_root = os.path.join(repo_root, "assets", "data")
@@ -53,6 +62,7 @@ def get_telegram_credentials(credentials=dlt.secrets.value):
 
 
 def run_pipeline_nyc_open_data() -> None:
+    app_name = "My Socrata Open Data Project"
     pipeline_name = "nyc_open_data"
     # Data will be stored at:
     # <dlt-pipeline_name>.<dlt-dataset_name>.<dlt-resource>
@@ -64,7 +74,6 @@ def run_pipeline_nyc_open_data() -> None:
     parse_mode = telegram_config["parse_mode"]
     bot_token = telegram_credentials["bot_token"]
     chat_id = telegram_credentials["chat_id"]
-    footer = f"<i>Sent by dlt pipeline <code>{pipeline_name}</code></i>"
 
     pipeline = dlt.pipeline(
         dataset_name=duckdb_schema,
@@ -77,63 +86,45 @@ def run_pipeline_nyc_open_data() -> None:
         progress="log",
     )
 
-    # I don't think dlt allows to retrieve the dlt runtime configuration of a
+    # I don't think dlt allows us to retrieve the dlt runtime configuration of a
     # pipeline that ran in the past. It might be a good idea to extract it now
     # and store it somewhere (e.g. table in dlt destination, GitHub comment,
     # Slack channel, etc).
-    prc = pipeline.runtime_config
-    print(f'pipeline {pipeline_name} log_level: {prc.get("log_level")}')
+    safe_send_telegram_text(
+        bot_token=bot_token,
+        chat_id=chat_id,
+        parse_mode=parse_mode,
+        text=runtime_configuration_text(pipeline=pipeline, app_name=app_name),
+    )
 
-    # print(f"pipeline {pipeline_name} runtime_config.items")
-    # for x in pipeline.runtime_config.items():
-    #     print(x)
-
-    # print(f"pipeline {pipeline_name} config.keys")
-    # for x in pipeline.config.keys():
-    #     print(x)
-
-    # TODO: should I wrap `pipeline.run`` in a try/except block?
     # https://dlthub.com/docs/walkthroughs/run-a-pipeline#failed-api-or-database-connections-and-other-exceptions
     try:
         load_info: LoadInfo = pipeline.run(nyc_open_data_source())
     except PipelineStepFailed as ex:
-        header = f"❌ <b>dlt pipeline <code>{pipeline_name}</code> failed at step <code>{ex.step}</code></b>"
-        arr = [header]
-
-        if ex.exception:
-            arr.append("\n\n")
-            arr.append("<b>Exception</b>")
-            arr.append("\n")
-            arr.append(f"<pre><code>{ex.exception}</code></pre>")
-
-        if ex.step_info:
-            arr.append("\n\n")
-            arr.append("<b>Step info</b>")
-            arr.append("\n")
-            arr.append(f"<pre><code>{ex.step_info}</code></pre>")
-
-        if ex.load_id:
-            arr.append("\n\n")
-            arr.append("<b>Load ID</b>")
-            arr.append("\n")
-            arr.append(f"<pre><code>{ex.load_id}</code></pre>")
-
-        arr.append("\n\n")
-        arr.append(footer)
-
         safe_send_telegram_text(
             bot_token=bot_token,
             chat_id=chat_id,
             parse_mode=parse_mode,
-            text="".join(arr),
+            text=pipeline_step_failed_text(exception=ex, app_name=app_name),
         )
-
         # we handled the exception by sending a notification to Telegram, so we
         # now let the exception bubble up
         raise
+    except ConfigFieldMissingException as ex:
+        safe_send_telegram_text(
+            bot_token=bot_token,
+            chat_id=chat_id,
+            parse_mode=parse_mode,
+            text=config_field_missing_exception_text(exception=ex, app_name=app_name),
+        )
+        raise
 
-    # print(load_info)
-    # print(load_info.asdict())
+    safe_send_telegram_text(
+        bot_token=bot_token,
+        chat_id=chat_id,
+        parse_mode=parse_mode,
+        text=load_info_text(load_info=load_info, app_name=app_name),
+    )
 
     # Send alerts about schema updates to Telegram.
     # https://dlthub.com/docs/running-in-production/alerting#slack
@@ -141,24 +132,14 @@ def run_pipeline_nyc_open_data() -> None:
     # https://dlthub.com/docs/walkthroughs/add_credentials#adding-credentials-to-your-deployment
     for package in load_info.load_packages:
         for table_name, table in package.schema_update.items():
-            for column_name, column in table["columns"].items():
-                header = f"⚠️ <b>Schema update in dlt pipeline <code>{pipeline_name}</code></b>"
-                arr = [
-                    header,
-                    "\n\n",
-                    f"Table: <code>{table_name}</code>",
-                    "\n",
-                    f"Column: <code>{column_name}</code>",
-                    "\n\n",
-                    footer,
-                ]
-
-                safe_send_telegram_text(
-                    bot_token=bot_token,
-                    chat_id=chat_id,
-                    parse_mode=parse_mode,
-                    text="".join(arr),
-                )
+            safe_send_telegram_text(
+                bot_token=bot_token,
+                chat_id=chat_id,
+                parse_mode=parse_mode,
+                text=table_schema_update_text(
+                    app_name=pipeline_name, table_name=table_name
+                ),
+            )
 
     # TODO: do I need this? Explain what this means and the pros & cons of using it.
     load_info.raise_on_failed_jobs()
