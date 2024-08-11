@@ -5,6 +5,7 @@ from loguru import logger
 from socrata import nyc_open_data_source
 from dlt.common.configuration.inject import with_config
 from dlt.common.pipeline import LoadInfo
+from dlt.pipeline.exceptions import PipelineStepFailed
 from notifications import safe_send_telegram_text
 
 repo_root = os.path.abspath(os.path.join(__file__, "..", ".."))
@@ -63,6 +64,7 @@ def run_pipeline_nyc_open_data() -> None:
     parse_mode = telegram_config["parse_mode"]
     bot_token = telegram_credentials["bot_token"]
     chat_id = telegram_credentials["chat_id"]
+    footer = f"<i>Sent by dlt pipeline <code>{pipeline_name}</code></i>"
 
     pipeline = dlt.pipeline(
         dataset_name=duckdb_schema,
@@ -75,10 +77,10 @@ def run_pipeline_nyc_open_data() -> None:
         progress="log",
     )
 
-    load_info: LoadInfo = pipeline.run(nyc_open_data_source())
-    # print(load_info)
-    # print(load_info.asdict())
-
+    # I don't think dlt allows to retrieve the dlt runtime configuration of a
+    # pipeline that ran in the past. It might be a good idea to extract it now
+    # and store it somewhere (e.g. table in dlt destination, GitHub comment,
+    # Slack channel, etc).
     prc = pipeline.runtime_config
     print(f'pipeline {pipeline_name} log_level: {prc.get("log_level")}')
 
@@ -90,31 +92,72 @@ def run_pipeline_nyc_open_data() -> None:
     # for x in pipeline.config.keys():
     #     print(x)
 
-    # send alert to Telegram chat. See how it's done for Slack.
+    # TODO: should I wrap `pipeline.run`` in a try/except block?
+    # https://dlthub.com/docs/walkthroughs/run-a-pipeline#failed-api-or-database-connections-and-other-exceptions
+    try:
+        load_info: LoadInfo = pipeline.run(nyc_open_data_source())
+    except PipelineStepFailed as ex:
+        header = f"❌ <b>dlt pipeline <code>{pipeline_name}</code> failed at step <code>{ex.step}</code></b>"
+        arr = [header]
+
+        if ex.exception:
+            arr.append("\n\n")
+            arr.append("<b>Exception</b>")
+            arr.append("\n")
+            arr.append(f"<pre><code>{ex.exception}</code></pre>")
+
+        if ex.step_info:
+            arr.append("\n\n")
+            arr.append("<b>Step info</b>")
+            arr.append("\n")
+            arr.append(f"<pre><code>{ex.step_info}</code></pre>")
+
+        if ex.load_id:
+            arr.append("\n\n")
+            arr.append("<b>Load ID</b>")
+            arr.append("\n")
+            arr.append(f"<pre><code>{ex.load_id}</code></pre>")
+
+        arr.append("\n\n")
+        arr.append(footer)
+
+        safe_send_telegram_text(
+            bot_token=bot_token,
+            chat_id=chat_id,
+            parse_mode=parse_mode,
+            text="".join(arr),
+        )
+
+        # we handled the exception by sending a notification to Telegram, so we
+        # now let the exception bubble up
+        raise
+
+    # print(load_info)
+    # print(load_info.asdict())
+
+    # Send alerts about schema updates to Telegram.
     # https://dlthub.com/docs/running-in-production/alerting#slack
     # https://dlthub.com/docs/examples/chess_production/
     # https://dlthub.com/docs/walkthroughs/add_credentials#adding-credentials-to-your-deployment
     for package in load_info.load_packages:
         for table_name, table in package.schema_update.items():
             for column_name, column in table["columns"].items():
-                header = "<b>Schema update!</b>"
-                footer = f"<i>Sent by dlt pipeline <code>{pipeline_name}</code></i>"
-                text = "".join(
-                    [
-                        header,
-                        "\n\n",
-                        f"Table: <code>{table_name}</code>",
-                        "\n" f"Column: <code>{column_name}</code>",
-                        "\n\n",
-                        footer,
-                    ]
-                )
+                header = f"⚠️ <b>Schema update in dlt pipeline <code>{pipeline_name}</code></b>"
+                arr = [
+                    header,
+                    "\n\n",
+                    f"Table: <code>{table_name}</code>",
+                    "\n",
+                    f"Column: <code>{column_name}</code>",
+                    "\n\n",
+                    footer,
+                ]
 
                 safe_send_telegram_text(
                     bot_token=bot_token,
                     chat_id=chat_id,
                     parse_mode=parse_mode,
-                    text=text,
+                    text="".join(arr),
                 )
 
     # TODO: do I need this? Explain what this means and the pros & cons of using it.
