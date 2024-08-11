@@ -7,8 +7,8 @@ request_backoff_factor = 1.5
 request_timeout = 180
 
 [sources.socrata]
-created_date_start = "2016-01-01"
-created_date_stop = "2017-01-01"
+created_date_start = "2017-01-01"
+created_date_stop = "2020-01-01"
 # When fetching the dataset "311 Service Requests from 2010 to Present" from
 # 2010-01-01 to 2011-01-01, we get some results if offset is LESS than 2_090_710.
 # When we set offset>=2_090_710, we get no results.

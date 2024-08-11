@@ -1,30 +1,29 @@
 import dlt
-import fire
 import os
-from loguru import logger
+import sys
 from socrata import nyc_open_data_source
 from dlt.common.configuration.inject import with_config
 from dlt.common.pipeline import LoadInfo
 from dlt.common.configuration.exceptions import ConfigFieldMissingException
 from dlt.pipeline.exceptions import PipelineStepFailed
-from notifications import (
+
+# Add the parent directory to the system path so that I can import Python code from sibling directories.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from common import (
+    get_telegram_config,
+    get_telegram_credentials,
+    APP_NAME,
+    DB_FILE_PATH,
+    SCHEMAS_ROOT,
+)
+from telegram import (
     load_info_text,
     runtime_configuration_text,
     safe_send_telegram_text,
-    schema_update_text,
     pipeline_step_failed_text,
     config_field_missing_exception_text,
     table_schema_update_text,
 )
-
-repo_root = os.path.abspath(os.path.join(__file__, "..", ".."))
-data_root = os.path.join(repo_root, "assets", "data")
-schemas_root = os.path.join(repo_root, "assets", "schemas")
-
-logger.debug({"repo_root": repo_root, "data_root": data_root})
-
-# pipeline_name = os.path.basename(__file__).replace('.py', '')
-# print(f'pipeline_name {pipeline_name}')
 
 # https://duckdb.org/docs/sql/meta/information_schema.html
 
@@ -44,26 +43,16 @@ logger.debug({"repo_root": repo_root, "data_root": data_root})
 # Note that dlt has also a concept of schema:
 # - dlt dataset and dlt schema are different things.
 # - A dlt schema can have a different name from a DuckDB schema.
+duckdb_catalog = "nyc_open_data"
 duckdb_schema = "landing_zone"
 
 # A single dlt pipeline will create, in the specified dlt dataset (i.e. DuckDB
 # schema) a table for each REST API resource.
 # https://dlthub.com/devel/general-usage/destination-tables
+pipeline_name = "nyc_open_data_ingestion"
 
 
-@with_config(sections=("telegram"))
-def get_telegram_config(config=dlt.config.value):
-    return {"parse_mode": config["parse_mode"]}
-
-
-@with_config(sections=("telegram"))
-def get_telegram_credentials(credentials=dlt.secrets.value):
-    return {"bot_token": credentials["bot_token"], "chat_id": credentials["chat_id"]}
-
-
-def run_pipeline_nyc_open_data() -> None:
-    app_name = "My Socrata Open Data Project"
-    pipeline_name = "nyc_open_data"
+def run() -> None:
     # Data will be stored at:
     # <dlt-pipeline_name>.<dlt-dataset_name>.<dlt-resource>
     # Which corresponds to:
@@ -77,11 +66,9 @@ def run_pipeline_nyc_open_data() -> None:
 
     pipeline = dlt.pipeline(
         dataset_name=duckdb_schema,
-        destination=dlt.destinations.duckdb(
-            os.path.join(data_root, f"{pipeline_name}.duckdb")
-        ),
+        destination=dlt.destinations.duckdb(DB_FILE_PATH),
         # dev_mode=True,
-        export_schema_path=os.path.join(schemas_root, "export"),
+        export_schema_path=os.path.join(SCHEMAS_ROOT, "export"),
         pipeline_name=pipeline_name,
         progress="log",
     )
@@ -94,7 +81,7 @@ def run_pipeline_nyc_open_data() -> None:
         bot_token=bot_token,
         chat_id=chat_id,
         parse_mode=parse_mode,
-        text=runtime_configuration_text(pipeline=pipeline, app_name=app_name),
+        text=runtime_configuration_text(pipeline=pipeline, app_name=APP_NAME),
     )
 
     # https://dlthub.com/docs/walkthroughs/run-a-pipeline#failed-api-or-database-connections-and-other-exceptions
@@ -105,7 +92,7 @@ def run_pipeline_nyc_open_data() -> None:
             bot_token=bot_token,
             chat_id=chat_id,
             parse_mode=parse_mode,
-            text=pipeline_step_failed_text(exception=ex, app_name=app_name),
+            text=pipeline_step_failed_text(exception=ex, app_name=APP_NAME),
         )
         # we handled the exception by sending a notification to Telegram, so we
         # now let the exception bubble up
@@ -115,7 +102,7 @@ def run_pipeline_nyc_open_data() -> None:
             bot_token=bot_token,
             chat_id=chat_id,
             parse_mode=parse_mode,
-            text=config_field_missing_exception_text(exception=ex, app_name=app_name),
+            text=config_field_missing_exception_text(exception=ex, app_name=APP_NAME),
         )
         raise
 
@@ -123,7 +110,7 @@ def run_pipeline_nyc_open_data() -> None:
         bot_token=bot_token,
         chat_id=chat_id,
         parse_mode=parse_mode,
-        text=load_info_text(load_info=load_info, app_name=app_name),
+        text=load_info_text(load_info=load_info, app_name=APP_NAME),
     )
 
     # Send alerts about schema updates to Telegram.
@@ -136,18 +123,16 @@ def run_pipeline_nyc_open_data() -> None:
                 bot_token=bot_token,
                 chat_id=chat_id,
                 parse_mode=parse_mode,
-                text=table_schema_update_text(
-                    app_name=pipeline_name, table_name=table_name
-                ),
+                text=table_schema_update_text(app_name=APP_NAME, table_name=table_name),
             )
 
-    # TODO: do I need this? Explain what this means and the pros & cons of using it.
+    # dlt does NOT raise exceptions on failed jobs, unless we call the method
+    # load_info.raise_on_failed_jobs(), which raises a DestinationHasFailedJobs
+    # exception.
+    # https://dlthub.com/docs/walkthroughs/run-a-pipeline#failed-jobs-in-load-package
+    # TODO: Explain the pros & cons of calling this method.
     load_info.raise_on_failed_jobs()
 
 
-def run():
-    run_pipeline_nyc_open_data()
-
-
 if __name__ == "__main__":
-    fire.Fire(run)
+    run()

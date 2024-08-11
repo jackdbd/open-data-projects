@@ -1,35 +1,29 @@
-# NYC 311
+# NYC Open Data to DuckDB
 
-This project can be managed with a few [Babashka tasks](https://book.babashka.org/#tasks).
+## Useful commands
 
-## Ingestion
+This project can be managed with a few [Babashka tasks](https://book.babashka.org/#tasks) and [Devenv scripts](https://devenv.sh/scripts/).
 
-Data ingestion performed by [dlt](https://github.com/dlt-hub/dlt).
-
-Define `created_date_start` and `created_date_stop` in the `[sources.socrata]` section of `config.toml`, then run the dlt pipeline using this Babashka task:
+Fetch data from NYC Open Data and ingest it into DuckDB:
 
 ```sh
-bb run ingest
+ingestion
 ```
 
-## Transformation
+Run dbt run in a dlt pipeline:
 
 ```sh
-cd transformation
+transformation
 ```
 
-```sh
-dbt debug
-```
+Build dbt docs:
 
 ```sh
-dbt run
+docs-build
 ```
 
-```sh
-dbt test
-```
+Serve dbt docs:
 
 ```sh
-dbt docs generate && dbt docs serve
+docs-serve
 ```

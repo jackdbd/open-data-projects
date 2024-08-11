@@ -1,15 +1,5 @@
-Welcome to your new dbt project!
+# Transformation
 
-### Using the starter project
+Data transformation with [dbt](https://github.com/dbt-labs/dbt-core).
 
-Try running the following commands:
-- dbt run
-- dbt test
-
-
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+Run `dbt run` from a dlt pipeline by typing `transformation` (it's a [Devenv script](https://devenv.sh/scripts/)).

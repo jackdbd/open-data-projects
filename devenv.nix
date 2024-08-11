@@ -5,7 +5,8 @@
   pkgs,
   ...
 }: {
-  env.DLT_PIPELINE = "nyc_open_data";
+  env.DLT_PIPELINE = "nyc_open_data_ingestion";
+  # env.DLT_PIPELINE = "nyc_open_data_transformation";
 
   # https://devenv.sh/languages/
   languages.nix.enable = true;
@@ -45,7 +46,6 @@
 
   enterShell = ''
     pipeline-list
-    print-versions
   '';
 
   # https://devenv.sh/tests/
@@ -70,12 +70,15 @@
 
   # https://devenv.sh/scripts/
   scripts = {
-    ingest.exec = "python ingestion/run-all-dlt-pipelines.py";
+    docs-build.exec = "pushd . && cd transformation/nyc_open_data && dbt docs generate && popd";
+    docs-serve.exec = "cd transformation/nyc_open_data && dbt docs serve";
+    ingestion.exec = "python ingestion/run-pipelines.py";
     pipeline-failed.exec = "dlt pipeline $DLT_PIPELINE failed-jobs";
     pipeline-info.exec = "dlt pipeline $DLT_PIPELINE info";
     pipeline-list.exec = "dlt pipeline --list-pipelines";
     pipeline-trace.exec = "dlt pipeline $DLT_PIPELINE trace";
-    print-versions.exec = ''
+    transformation.exec = "python transformation/run-pipelines.py";
+    versions.exec = ''
       echo "Versions"
       ${pkgs.babashka}/bin/bb --version
       echo "dbt"

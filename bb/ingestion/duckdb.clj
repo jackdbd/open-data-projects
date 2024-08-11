@@ -49,9 +49,9 @@
 ;;         :schema-name "landing"
 ;;         :table-name "pokemon"})
 
-(-main {:db-filepath (fname->fpath "nyc_open_data.duckdb")
-        :schema-name "landing"
-        :table-name "service_requests_311"})
+;; (-main {:db-filepath (fname->fpath "nyc_open_data.duckdb")
+;;         :schema-name "landing"
+;;         :table-name "service_requests_311"})
 
 (comment
   (def ts-start "2010-01-01T00:00:00.000")

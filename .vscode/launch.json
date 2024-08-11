@@ -6,7 +6,7 @@
       "request": "launch",
       "console": "integratedTerminal",
       "justMyCode": false,
-      "program": "${workspaceFolder}/ingestion/run-all-dlt-pipelines.py",
+      "program": "${workspaceFolder}/ingestion/run-pipelines.py",
       "args": [
         "--date-start",
         "2024-06-01",

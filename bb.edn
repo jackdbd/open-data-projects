@@ -3,24 +3,20 @@
  
  :min-bb-version "1.3.0"
 
- :paths ["dev" "src"]
+ :paths ["dev" "bb"]
 
  :pods {}
 
- :tasks {download-sample 
+ :tasks {download-sample
          {:doc "download a small sample of data from the NYC Open Data API"
-          :task (shell "bb -f src/extraction/socrata.clj")}
-         
+          :task (shell "bb -f bb/extraction/socrata.clj")} 
+
          export-schema-film-permits
          {:doc "Export the schema of the film_permits table as JSON"
           :requires ([tasks])
           :task (tasks/export-schema "film_permits")}
-         
+
          export-schema-service-requests-311
          {:doc "Export the schema of the service_requests_311 table as JSON"
           :requires ([tasks])
-          :task (tasks/export-schema "service_requests_311")}
-
-         ingest
-         {:doc "Run all dlt pipelines for data ingestion"
-          :task (shell "python ingestion/run-all-dlt-pipelines.py")}}}
+          :task (tasks/export-schema "service_requests_311")}}}

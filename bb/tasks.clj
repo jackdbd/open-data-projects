@@ -14,7 +14,7 @@
   (let [db-filepath (-> (io/file "assets" "data" "nyc_open_data.duckdb")
                         (.getCanonicalFile))]
     (describe! {:db-filepath db-filepath
-                :schema "landing"
+                :schema "landing_zone"
                 :table table})))
 
 (comment

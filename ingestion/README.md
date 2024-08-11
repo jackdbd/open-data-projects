@@ -1,12 +1,8 @@
-# ingest
+# Ingestion
 
 Data ingestion with [dlt](https://github.com/dlt-hub/dlt) pipelines.
 
-Define `created_date_start` and `created_date_stop` in the `[sources.socrata]` section of `config.toml`, then run the dlt pipeline using this Babashka task:
-
-```sh
-bb run ingest
-```
+Define `created_date_start` and `created_date_stop` in the `[sources.socrata]` section of `config.toml`, then run the dlt pipeline by typing `ingestion` (it's a [Devenv script](https://devenv.sh/scripts/)).
 
 ## Reference
 
