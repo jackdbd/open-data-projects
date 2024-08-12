@@ -1,7 +1,6 @@
-import datetime
 import dlt
 from requests import Request, Response
-from typing import Any
+from typing import Any, Optional
 from rest_api import (
     RESTAPIConfig,
     rest_api_resources,
@@ -10,9 +9,9 @@ from rest_api import (
 # from dlt.common import logger
 from loguru import logger
 from dlt.sources.helpers.rest_client.paginators import OffsetPaginator
+from .utils import date_interval
 
 
-# TODO: is this implementation correct? Do I have to override any more methods?
 class SocrataPaginator(OffsetPaginator):
     def update_state(self, response: Response) -> None:
         super().update_state(response)
@@ -40,16 +39,13 @@ paginator_maximum_offset = max(
     num_rows_in_nyc_staten_island_ferry_ridership_count,
 )
 
-today = datetime.datetime.today()
-thirty_days_ago = today - datetime.timedelta(days=30)
-
 
 @dlt.source
 def nyc_open_data_source(
-    created_date_start: str = thirty_days_ago.strftime("%Y-%m-%d"),
-    created_date_stop: str = today.strftime("%Y-%m-%d"),
-    paginator_limit: int = 10_000,
-    paginator_offset: int = 0,
+    created_date_start: Optional[str] = None,
+    created_date_stop: Optional[str] = None,
+    paginator_limit: Optional[int] = 10_000,
+    paginator_offset: Optional[int] = 0,
     socrata_application_token: str = dlt.secrets.value,
 ) -> Any:
     """Fetch NYC data from the Socrata Open Data API.
@@ -57,10 +53,18 @@ def nyc_open_data_source(
     https://dev.socrata.com/
     """
 
+    created_date_delta = {"weeks": 0, "days": 30}
+    d_interval = date_interval(
+        start=created_date_start, stop=created_date_stop, delta=created_date_delta
+    )
+    created_date_start = d_interval["start"]
+    created_date_stop = d_interval["stop"]
+
     logger.info(
         {
             "created_date_start": created_date_start,
             "created_date_stop": created_date_stop,
+            "created_date_delta": created_date_delta,
             "paginator_limit": paginator_limit,
             "paginator_offset": paginator_offset,
             "paginator_maximum_offset": paginator_maximum_offset,
