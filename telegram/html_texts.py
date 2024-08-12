@@ -166,13 +166,22 @@ def table_schema_update(
     table_name: str, table: Any, app_name: Optional[str] = DEFAULT_APP_NAME
 ):
     header = f"{WARNING_EMOJI} <b>Schema update</b>"
+    table_info = {k: v for k, v in table.items() if k != "columns" and k != "name"}
 
-    arr = [header, "\n\n", f"Table <code>{table_name}</code> changed its schema."]
+    arr = [
+        header,
+        "\n\n",
+        f"Table <code>{table_name}</code> changed its schema.",
+        f"\n\n<pre><code>{json.dumps(table_info, pretty=True, sort_keys=True)}</code></pre>",
+    ]
 
-    arr.append("\n\n<b>Columns updated:</b>\n")
-    for i, tc in enumerate(table["columns"].items()):
-        column_name, column = tc
-        arr.append(f"\n{i+1}. {column_name}: {column['data_type']}")
+    arr.append("\n\n<b>Columns</b>")
+    for column_name, column in table["columns"].items():
+        column_info = {k: v for k, v in column.items() if k != "name"}
+        arr.append(f"\n\n{column_name}")
+        arr.append(
+            f"\n<pre><code>{json.dumps(column_info, pretty=True, sort_keys=True)}</code></pre>"
+        )
 
     arr.append(f"\n\n{footer(app_name)}")
     return "".join(arr)
