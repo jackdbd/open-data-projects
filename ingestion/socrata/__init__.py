@@ -110,18 +110,18 @@ def nyc_open_data_source(
         "resources": [
             # https://dev.socrata.com/foundry/data.cityofnewyork.us/erm2-nwe9
             # https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9/about_data
-            {
-                "name": "service_requests_311",
-                "primary_key": "unique_key",
-                "endpoint": {
-                    "path": "erm2-nwe9.json",
-                    "params": {
-                        "$order": "created_date",
-                        # https://dev.socrata.com/docs/functions/between
-                        "$where": f"created_date between '{created_date_start}' and '{created_date_stop}'",
-                    },
-                },
-            },
+            # {
+            #     "name": "service_requests_311",
+            #     "primary_key": "unique_key",
+            #     "endpoint": {
+            #         "path": "erm2-nwe9.json",
+            #         "params": {
+            #             "$order": "created_date",
+            #             # https://dev.socrata.com/docs/functions/between
+            #             "$where": f"created_date between '{created_date_start}' and '{created_date_stop}'",
+            #         },
+            #     },
+            # },
             # https://dev.socrata.com/foundry/data.cityofnewyork.us/tg4x-b46p
             # https://data.cityofnewyork.us/City-Government/Film-Permits/tg4x-b46p/about_data
             {
@@ -136,16 +136,16 @@ def nyc_open_data_source(
             },
             # https://dev.socrata.com/foundry/data.cityofnewyork.us/6eng-46dm
             # https://data.cityofnewyork.us/Transportation/Staten-Island-Ferry-Ridership-Counts/6eng-46dm/about_data
-            {
-                "name": "staten_island_ferry_ridership_counts",
-                "merge_key": "date",
-                "endpoint": {
-                    "path": "6eng-46dm.json",
-                    "params": {
-                        "$order": "date",
-                    },
-                },
-            },
+            # {
+            #     "name": "staten_island_ferry_ridership_counts",
+            #     "merge_key": "date",
+            #     "endpoint": {
+            #         "path": "6eng-46dm.json",
+            #         "params": {
+            #             "$order": "date",
+            #         },
+            #     },
+            # },
         ],
     }
 

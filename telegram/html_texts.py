@@ -12,6 +12,7 @@ from dlt.pipeline.exceptions import PipelineStepFailed
 MAX_TEXT_LENGHT = 4096
 DEFAULT_APP_NAME = "My App"
 
+DATABASE_EMOJI = "⛁"
 ERROR_EMOJI = "❌"
 GEAR_EMOJI = "⚙️"
 INFO_EMOJI = "ℹ️"
@@ -69,7 +70,7 @@ def load_info(load_info: LoadInfo, app_name: Optional[str] = DEFAULT_APP_NAME):
     pipeline_name = load_info.pipeline.pipeline_name
     destination_name = load_info.destination_name
     dataset_name = load_info.dataset_name
-    header = f"{INFO_EMOJI} <b>Load info</b>"
+    header = f"{DATABASE_EMOJI} <b>Load info</b>"
 
     arr = [
         header,
@@ -168,9 +169,10 @@ def table_schema_update(
 
     arr = [header, "\n\n", f"Table <code>{table_name}</code> changed its schema."]
 
-    arr.append("\n\n<b>Columns updated:</b>")
-    for column_name, column in table["columns"].items():
-        arr.append(f"\n - <code>{column_name}</code>")
+    arr.append("\n\n<b>Columns updated:</b>\n")
+    for i, tc in enumerate(table["columns"].items()):
+        column_name, column = tc
+        arr.append(f"\n{i+1}. {column_name}: {column['data_type']}")
 
     arr.append(f"\n\n{footer(app_name)}")
     return "".join(arr)
@@ -217,12 +219,13 @@ if __name__ == "__main__":
     print("END text pipeline_step_failed")
 
     table_name = "my_table"
+    columns = {"foo": {"data_type": "VARCHAR"}, "bar": {"data_type": "INTEGER"}}
     print("\n\nBEGIN text table_schema_update")
     print(
         table_schema_update(
             app_name=app_name,
             table_name=table_name,
-            table={"columns": {"foo": "VARCHAR", "bar": "INTEGER"}},
+            table={"columns": columns},
         )
     )
     print("END text table_schema_update")

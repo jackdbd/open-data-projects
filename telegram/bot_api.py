@@ -155,6 +155,7 @@ df = pd.DataFrame(data={'col1': [1, 2], 'col2': [3, 4]})</code></pre>"""
     )
 
     table_name = "my_table"
+    columns = {"foo": {"data_type": "VARCHAR"}, "bar": {"data_type": "INTEGER"}}
     logger.debug(f"send table_schema_update text")
     safe_send_text(
         bot_token=bot_token,
@@ -162,6 +163,6 @@ df = pd.DataFrame(data={'col1': [1, 2], 'col2': [3, 4]})</code></pre>"""
         text=table_schema_update(
             app_name=app_name,
             table_name=table_name,
-            table={"columns": {"foo": "VARCHAR", "bar": "INTEGER"}},
+            table={"columns": columns},
         ),
     )

@@ -135,7 +135,7 @@ def run() -> None:
     # exception.
     # https://dlthub.com/docs/walkthroughs/run-a-pipeline#failed-jobs-in-load-package
     # TODO: Explain the pros & cons of calling this method.
-    load_info.raise_on_failed_jobs()
+    # load_info.raise_on_failed_jobs()
 
 
 if __name__ == "__main__":

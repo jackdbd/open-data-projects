@@ -72,12 +72,12 @@
   scripts = {
     docs-build.exec = "pushd . && cd transformation/nyc_open_data && dbt docs generate && popd";
     docs-serve.exec = "cd transformation/nyc_open_data && dbt docs serve";
-    ingestion.exec = "python ingestion/run-pipelines.py";
+    ingestion.exec = "python ingestion/run_pipelines.py";
     pipeline-failed.exec = "dlt pipeline $DLT_PIPELINE failed-jobs";
     pipeline-info.exec = "dlt pipeline $DLT_PIPELINE info";
     pipeline-list.exec = "dlt pipeline --list-pipelines";
     pipeline-trace.exec = "dlt pipeline $DLT_PIPELINE trace";
-    transformation.exec = "python transformation/run-pipelines.py";
+    transformation.exec = "python transformation/run_pipelines.py";
     versions.exec = ''
       echo "Versions"
       ${pkgs.babashka}/bin/bb --version

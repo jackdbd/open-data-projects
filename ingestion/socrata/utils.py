@@ -5,15 +5,20 @@ from typing import Optional
 def date_interval(
     start: Optional[str] = None,
     stop: Optional[str] = None,
-    delta: Optional[dict] = {"weeks": 0, "days": 1},
+    delta: Optional[dict] = None,
 ):
+    default_weeks = 0
+    default_days = 1
+    if not delta:
+        delta = {"weeks": default_weeks, "days": default_days}
+
     if start and stop:
         return {"start": start, "stop": stop}
 
     fmt = "%Y-%m-%d"
 
-    delta_weeks = delta.get("weeks", 0)
-    delta_days = delta.get("days", 1)
+    delta_weeks = delta.get("weeks", default_weeks)
+    delta_days = delta.get("days", default_days)
     delta = datetime.timedelta(weeks=delta_weeks, days=delta_days)
     # print(delta)
 
