@@ -118,12 +118,16 @@ def run() -> None:
     # https://dlthub.com/docs/examples/chess_production/
     # https://dlthub.com/docs/walkthroughs/add_credentials#adding-credentials-to-your-deployment
     for package in load_info.load_packages:
+        # schema: Schema = package.schema
+        # https://github.com/dlt-hub/dlt/blob/e00baa0c8f03d1d8be2fffe8cf2e1b56b8d5449e/dlt/common/schema/schema.py#L72
         for table_name, table in package.schema_update.items():
             safe_send_telegram_text(
                 bot_token=bot_token,
                 chat_id=chat_id,
                 parse_mode=parse_mode,
-                text=table_schema_update_text(app_name=APP_NAME, table_name=table_name),
+                text=table_schema_update_text(
+                    app_name=APP_NAME, table_name=table_name, table=table
+                ),
             )
 
     # dlt does NOT raise exceptions on failed jobs, unless we call the method
