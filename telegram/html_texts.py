@@ -145,20 +145,16 @@ def generic_exception(exception: Exception, app_name: Optional[str] = DEFAULT_AP
 def runtime_configuration(
     pipeline: Pipeline, app_name: Optional[str] = DEFAULT_APP_NAME
 ):
-    # config: RunConfiguration = pipeline.runtime_config
     header = f"{GEAR_EMOJI} <b>Pipeline configuration</b>"
+    cfg: RunConfiguration = pipeline.runtime_config
 
     arr = [
         header,
-        "\n\n",
-        f"Configuration for dlt pipeline <code>{pipeline.pipeline_name}</code>.",
+        "\n\n<b>dlt runtime</b>",
+        f"\n<pre><code>{json.dumps(cfg, pretty=True, sort_keys=True)}</code></pre>",
+        f"\n\n{footer(app_name)}",
     ]
 
-    arr.append("\n\n<b>dlt runtime:</b>")
-    for k, v in pipeline.runtime_config.items():
-        arr.append(f"\n{k}: <code>{v}</code>")
-
-    arr.append(f"\n\n{footer(app_name)}")
     return "".join(arr)
 
 
