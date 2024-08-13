@@ -9,7 +9,7 @@ nyc_open_data:
   outputs:
     dev: # target name
       type: duckdb
-      schema: silver_layer_nyc
+      schema: silver_layer
       path: ~/repos/open-data-projects/assets/data/nyc_open_data.duckdb
       threads: 1
 

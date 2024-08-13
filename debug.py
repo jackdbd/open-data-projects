@@ -1,8 +1,10 @@
 import debugpy
 from loguru import logger
 
+# from ingestion.run_pipelines import run as ingestion
 from telegram.bot_api import safe_send_text
 from telegram.html_texts import generic_exception
+from transformation.run_pipelines import run as transformation
 
 host = "localhost"
 port = 5678
@@ -13,5 +15,7 @@ debugpy.wait_for_client()  # This will block execution until the debugger is att
 logger.debug("Debugger attached.")
 
 # functions that you actually want to debug
-safe_send_text(bot_token="123", chat_id="123", text="test message")
-generic_exception(exception=Exception("test exception"))
+# safe_send_text(bot_token="123", chat_id="123", text="test message")
+# generic_exception(exception=Exception("test exception"))
+# ingestion()
+transformation()

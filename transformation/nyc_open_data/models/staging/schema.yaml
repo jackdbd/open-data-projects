@@ -2,9 +2,57 @@
 version: 2
 
 models:
-  - name: cleaned_service_requests_311
+  - name: stg_film_permits
     description: >
-      The cleaned 311 service requests made by New Yorkers.
+      The cleaned film_permits table.
+    config:
+      materialized: table
+    meta:
+      contains_pii: false
+      owner: "@giacomo"
+    tags:
+      - film
+      - movie
+      - permit
+      - silver
+    columns:
+      - name: category
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - Commercial
+                - Documentary
+                - Film
+                - Music Video
+                - Still Photography
+                - Student
+                - Television
+                - Theater
+                - WEB
+      - name: eventagency
+        data_tests:
+          - not_null
+          # - accepted_values:
+          #     values:
+          #       - Mayor\'s Office of Media & Entertainment # I tried escaping the single quote but it didn't work
+      - name: eventtype
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - DCAS Prep/Shoot/Wrap Permit
+                - Rigging Permit
+                - Shooting Permit
+                - Theater Load in and Load Outs
+      - name: eventid
+        description: Unique identifier for a film permit.
+        data_tests:
+          - not_null
+          - unique
+
+  - name: stg_service_requests_311
+    description: '{{ doc("stg_service_requests_311") }}'
     config:
       materialized: table
     meta:
@@ -16,21 +64,35 @@ models:
       - nyc
       - silver
     columns:
-      - name: unique_key
-        description: The primary key for this table.
-        data_tests:
-          - not_null
-          - unique
-      - name: created_date
-        data_tests:
-          - not_null
       - name: agency
         description: >
           The NYC agency that received a complaint from a New Yorker.
         data_tests:
           - not_null
-          # - accepted_values:
+          # - accepted_values: # There are 33 different agencies, I'm not going to list them all
           #     values:
           #       - ACS
           #       - DOT
           #       - NYPD
+      - name: borough
+        description: One of the borough in NYC.
+        data_tests:
+          - accepted_values:
+              values:
+                - BRONX
+                - BROOKLYN
+                - MANHATTAN
+                - QUEENS
+                - STATEN ISLAND
+                - Unspecified
+      - name: complaint_type # There is some crazy stuff in here. Need a good dose of data cleaning
+        data_tests:
+          - not_null
+      - name: created_date
+        data_tests:
+          - not_null
+      - name: unique_key
+        description: Unique identifier for a 311 service request.
+        data_tests:
+          - not_null
+          - unique

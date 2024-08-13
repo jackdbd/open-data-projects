@@ -4,15 +4,17 @@ sources:
   - name: nyc_open_data
     description: >
       Various datasets found on the [NYC Open Data portal](https://opendata.cityofnewyork.us/).
-    database: nyc_open_data
-    schema: landing_zone
+    database: nyc_open_data # DuckDB catalog
+    schema: landing_zone # DuckDB schema
     meta:
       contains_pii: false
+      loader: dlt
       owner: "@giacomo"
     tags:
-      - nyc
       - bronze
+      - nyc
       - raw
+      - source
     tables:
       - name: service_requests_311
         description: >
@@ -41,6 +43,7 @@ sources:
         tags:
           - film
           - movie
+          - permit
       - name: staten_island_ferry_ridership_counts
         description: >
           NYC Open Data dataset [Staten Island Ferry Ridership Counts](https://data.cityofnewyork.us/Transportation/Staten-Island-Ferry-Ridership-Counts/6eng-46dm/about_data).

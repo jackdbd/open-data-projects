@@ -14,7 +14,8 @@ from common import (
     get_telegram_credentials,
 )
 from telegram import (
-    dbt_model_materialized_text,
+    dbt_models_recap_text,
+    dbt_tests_recap_text,
     generic_exception_text,
     runtime_configuration_text,
     safe_send_telegram_text,
@@ -54,9 +55,10 @@ def run() -> None:
 
     dbt = dlt.dbt.package(pipeline, DBT_PACKAGE_PATH, venv=venv)
 
-    models = []
+    destination_dataset_name = "silver_layer"
+
     try:
-        models = dbt.run_all(
+        results = dbt.run_all(
             run_params=(
                 "--fail-fast",
                 "--log-format",
@@ -70,22 +72,52 @@ def run() -> None:
             ),
             # additional_vars=None,
             # source_tests_selector=None,
-            destination_dataset_name="silver_layer",
-        )
-    except Exception as ex:
-        safe_send_telegram_text(
-            bot_token=bot_token,
-            chat_id=chat_id,
-            parse_mode=parse_mode,
-            text=generic_exception_text(app_name=APP_NAME, exception=ex),
+            destination_dataset_name=destination_dataset_name,
         )
 
-    for model in models:
         safe_send_telegram_text(
             bot_token=bot_token,
             chat_id=chat_id,
             parse_mode=parse_mode,
-            text=dbt_model_materialized_text(app_name=APP_NAME, dbt=dbt, model=model),
+            text=dbt_models_recap_text(
+                dbt_node_results=results, dbt=dbt, app_name=APP_NAME
+            ),
+        )
+    except Exception as ex:
+        tip = f"Try looking for errors in the terminal or in the <code>dbt.log</code> file. Or try running <code>dbt run</code> manually."
+        safe_send_telegram_text(
+            bot_token=bot_token,
+            chat_id=chat_id,
+            parse_mode=parse_mode,
+            text=generic_exception_text(app_name=APP_NAME, exception=ex, tip=tip),
+        )
+
+    try:
+        results = dbt.test(
+            cmd_params=[],
+            additional_vars=None,
+            destination_dataset_name=destination_dataset_name,
+        )
+
+        safe_send_telegram_text(
+            bot_token=bot_token,
+            chat_id=chat_id,
+            parse_mode=parse_mode,
+            text=dbt_tests_recap_text(
+                dbt_node_results=results, dbt=dbt, app_name=APP_NAME
+            ),
+        )
+    except Exception as ex:
+        tip = f"Try looking for errors in the terminal or in the <code>dbt.log</code> file. Or try running <code>dbt test</code> manually."
+        safe_send_telegram_text(
+            bot_token=bot_token,
+            chat_id=chat_id,
+            parse_mode=parse_mode,
+            text=generic_exception_text(
+                app_name=APP_NAME,
+                exception=ex,
+                tip=tip,
+            ),
         )
 
 

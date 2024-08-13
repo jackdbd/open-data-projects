@@ -1,11 +1,13 @@
 import datetime
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 import dlt
 from dlt.common.configuration.exceptions import ConfigFieldMissingException
 from dlt.common.configuration.specs import RunConfiguration
 from dlt.common.json import json
 from dlt.common.pipeline import LoadInfo
+from dlt.helpers.dbt import DBTPackageRunner
+from dlt.helpers.dbt.exceptions import DBTNodeResult
 from dlt.pipeline import Pipeline
 from dlt.pipeline.exceptions import PipelineStepFailed
 
@@ -19,6 +21,7 @@ GEAR_EMOJI = "⚙️"
 INFO_EMOJI = "ℹ️"
 SUCCESS_EMOJI = "✅"
 TEST_EMOJI = "🧪"
+TIP_EMOJI = "💡"
 WARNING_EMOJI = "⚠️"
 
 
@@ -48,10 +51,25 @@ def config_field_missing_exception(
         return "".join([header, missing_str, footer_])
 
 
+def dbt_info(dbt: DBTPackageRunner):
+    d = {
+        # "config": dbt.config, # not too useful IMHO
+        "source_dataset_name": dbt.source_dataset_name,
+        "package_path": dbt.package_path,
+        "working_dir": dbt.working_dir,
+    }
+
+    arr = [
+        "Info on the dbt environment.",
+        f"\n<pre><code>{json.dumps(d, pretty=True, sort_keys=True)}</code></pre>",
+    ]
+    return "".join(arr)
+
+
 def dbt_model_materialized(
-    dbt: Any, model: Any, app_name: Optional[str] = DEFAULT_APP_NAME
+    dbt: DBTPackageRunner, model: Any, app_name: Optional[str] = DEFAULT_APP_NAME
 ):
-    header = f"{SUCCESS_EMOJI} <b>Model materialized</b>"
+    header = f"{DATABASE_EMOJI} <b>Model materialized</b>"
 
     arr = [
         header,
@@ -62,6 +80,64 @@ def dbt_model_materialized(
     arr.append(f"\n\nMessage: {model.message}")
     arr.append(f"\n\nSource dataset name: <code>{dbt.source_dataset_name}</code>")
     arr.append(f"\n\nPackage path: <code>{dbt.package_path}</code>")
+
+    arr.append(f"\n\n{footer(app_name)}")
+    return "".join(arr)
+
+
+def dbt_models_recap(
+    dbt_node_results: Sequence[DBTNodeResult],
+    dbt: DBTPackageRunner = None,
+    app_name: Optional[str] = DEFAULT_APP_NAME,
+):
+    header = f"{DATABASE_EMOJI} <b>dbt models</b>"
+    arr = [header, "\n\n", f"{len(dbt_node_results)} dbt models materialized.", "\n"]
+
+    for res in dbt_node_results:
+        emoji = SUCCESS_EMOJI if res.status == "success" else ERROR_EMOJI
+        desc = f"<code>{res.model_name}</code> materialized in {res.time:.2f} seconds."
+        arr.append(f"\n{emoji} {desc}")
+
+    if dbt:
+        arr.append(f"\n\n{dbt_info(dbt)}")
+    arr.append(f"\n\n{footer(app_name)}")
+    return "".join(arr)
+
+
+def dbt_tests_recap(
+    dbt_node_results: Sequence[DBTNodeResult],
+    dbt: DBTPackageRunner = None,
+    app_name: Optional[str] = DEFAULT_APP_NAME,
+):
+    header = f"{TEST_EMOJI} <b>dbt tests</b>"
+    arr = [
+        header,
+        "\n\n",
+        f"{len(dbt_node_results)} tests on dbt sources and models.",
+        "\n",
+    ]
+
+    for res in dbt_node_results:
+        emoji = SUCCESS_EMOJI if res.status == "pass" else ERROR_EMOJI
+        arr.append(f"\n{emoji} {res.model_name}")
+
+    if dbt:
+        arr.append(f"\n\n{dbt_info(dbt)}")
+    arr.append(f"\n\n{footer(app_name)}")
+    return "".join(arr)
+
+
+def generic_exception(
+    exception: Exception,
+    app_name: Optional[str] = DEFAULT_APP_NAME,
+    tip: Optional[str] = None,
+):
+    header = f"{ERROR_EMOJI} <b>Exception</b>"
+    arr = [header]
+
+    arr.append(f"\n\n<pre><code>{exception}</code></pre>")
+    if tip:
+        arr.append(f"\n\n{TIP_EMOJI} <b>TIP</b>\n{tip}")
 
     arr.append(f"\n\n{footer(app_name)}")
     return "".join(arr)
@@ -131,22 +207,10 @@ def pipeline_step_failed(
     return "".join(arr)
 
 
-def generic_exception(exception: Exception, app_name: Optional[str] = DEFAULT_APP_NAME):
-    header = f"{ERROR_EMOJI} <b>Pipeline failed</b>"
-    arr = [header]
-
-    if exception:
-        arr.append("\n\n<b>Exception</b>")
-        arr.append(f"\n<pre><code>{exception}</code></pre>")
-
-    arr.append(f"\n\n{footer(app_name)}")
-    return "".join(arr)
-
-
 def runtime_configuration(
     pipeline: Pipeline, app_name: Optional[str] = DEFAULT_APP_NAME
 ):
-    header = f"{GEAR_EMOJI} <b>Pipeline configuration</b>"
+    header = f"{GEAR_EMOJI} <b>Run configuration</b>"
     cfg: RunConfiguration = pipeline.runtime_config
 
     arr = [
