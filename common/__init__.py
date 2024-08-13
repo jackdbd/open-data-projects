@@ -1,5 +1,6 @@
-import dlt
 import os
+
+import dlt
 from dlt.common.configuration.inject import with_config
 
 REPO_ROOT = os.path.abspath(os.path.join(__file__, "..", ".."))

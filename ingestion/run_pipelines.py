@@ -1,27 +1,28 @@
-import dlt
 import os
 import sys
-from socrata import nyc_open_data_source
+
+import dlt
+from dlt.common.configuration.exceptions import ConfigFieldMissingException
 from dlt.common.configuration.inject import with_config
 from dlt.common.pipeline import LoadInfo
-from dlt.common.configuration.exceptions import ConfigFieldMissingException
 from dlt.pipeline.exceptions import PipelineStepFailed
+from socrata import nyc_open_data_source
 
 # Add the parent directory to the system path so that I can import Python code from sibling directories.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from common import (
-    get_telegram_config,
-    get_telegram_credentials,
     APP_NAME,
     DB_FILE_PATH,
     SCHEMAS_ROOT,
+    get_telegram_config,
+    get_telegram_credentials,
 )
 from telegram import (
+    config_field_missing_exception_text,
     load_info_text,
+    pipeline_step_failed_text,
     runtime_configuration_text,
     safe_send_telegram_text,
-    pipeline_step_failed_text,
-    config_field_missing_exception_text,
     table_schema_update_text,
 )
 

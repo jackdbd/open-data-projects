@@ -1,6 +1,7 @@
+from typing import Dict
+
 import dlt
 import requests
-from typing import Dict
 from dlt.common import logger
 from dlt.common.json import json
 from dlt.pipeline import Pipeline
@@ -80,21 +81,21 @@ if __name__ == "__main__":
 
     # Add the parent directory to the system path so that I can import Python code from sibling directories.
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-    from common import (
-        get_telegram_config,
-        get_telegram_credentials,
-        APP_NAME,
-        TEST_DLT_PIPELINE_NAME,
+    from html_texts import (
+        pipeline_step_failed,
+        runtime_configuration,
+        table_schema_update,
     )
 
     # replace dlt logger with loguru, so I don't have to remember to set an
     # environment variable to see log messages
     from loguru import logger
 
-    from html_texts import (
-        pipeline_step_failed,
-        runtime_configuration,
-        table_schema_update,
+    from common import (
+        APP_NAME,
+        TEST_DLT_PIPELINE_NAME,
+        get_telegram_config,
+        get_telegram_credentials,
     )
 
     telegram_config = get_telegram_config()

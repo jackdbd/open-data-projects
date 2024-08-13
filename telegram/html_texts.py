@@ -1,6 +1,7 @@
 import datetime
-import dlt
 from typing import Any, Optional
+
+import dlt
 from dlt.common.configuration.exceptions import ConfigFieldMissingException
 from dlt.common.configuration.specs import RunConfiguration
 from dlt.common.json import json
@@ -189,10 +190,7 @@ if __name__ == "__main__":
 
     # Add the parent directory to the system path so that I can import Python code from sibling directories.
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-    from common import (
-        APP_NAME,
-        TEST_DLT_PIPELINE_NAME,
-    )
+    from common import APP_NAME, TEST_DLT_PIPELINE_NAME
 
     app_name = APP_NAME
     pipeline_name = TEST_DLT_PIPELINE_NAME

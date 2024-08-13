@@ -1,16 +1,17 @@
-import dlt
 import os
 import sys
+
+import dlt
 
 # Add the parent directory to the system path so that I can import Python code from sibling directories.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from common import (
-    get_telegram_config,
-    get_telegram_credentials,
     APP_NAME,
     DB_FILE_PATH,
-    SCHEMAS_ROOT,
     DBT_PACKAGE_PATH,
+    SCHEMAS_ROOT,
+    get_telegram_config,
+    get_telegram_credentials,
 )
 from telegram import (
     dbt_model_materialized_text,

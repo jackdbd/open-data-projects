@@ -1,14 +1,13 @@
-import dlt
-from requests import Request, Response
 from typing import Any, Optional
-from rest_api import (
-    RESTAPIConfig,
-    rest_api_resources,
-)
+
+import dlt
+from dlt.sources.helpers.rest_client.paginators import OffsetPaginator
 
 # from dlt.common import logger
 from loguru import logger
-from dlt.sources.helpers.rest_client.paginators import OffsetPaginator
+from requests import Request, Response
+from rest_api import RESTAPIConfig, rest_api_resources
+
 from .utils import date_interval
 
 
