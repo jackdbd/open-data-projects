@@ -20,10 +20,6 @@ from telegram import (
     safe_send_telegram_text,
 )
 
-duckdb_catalog = "nyc_open_data"
-duckdb_schema = "silver_layer"
-pipeline_name = "nyc_open_data_transformation"
-
 
 def run() -> None:
     telegram_config = get_telegram_config()
@@ -32,14 +28,16 @@ def run() -> None:
     bot_token = telegram_credentials["bot_token"]
     chat_id = telegram_credentials["chat_id"]
 
-    # TODO: I want the DuckDB schema to be `silver_layer`, not `silver_layer_silver_layer`
-    # This pipeline creates the following structure in DuckDB:
-    # nyc_open_data.silver_layer_silver_layer.<table-name>
+    # I want the DuckDB schema containing the data transformed by dbt to be
+    # called `silver_layer`. It looks the only way to achieve this is to set
+    # ONLY the destination_dataset_name parameter in the dbt.run_all() method,
+    # and NOT set the dataset_name parameter in the dlt.pipeline() method.
+    # Otherwise the DuckDB schema created will be:
+    #  <destination_dataset_name>_<dataset_name>
     pipeline = dlt.pipeline(
-        dataset_name=duckdb_schema,
         destination=dlt.destinations.duckdb(DB_FILE_PATH),
         export_schema_path=os.path.join(SCHEMAS_ROOT, "export"),
-        pipeline_name=pipeline_name,
+        pipeline_name="nyc_open_data_transformation",
         progress="log",
         # https://dlthub.com/docs/dlt-ecosystem/staging
         # staging="?"
@@ -58,8 +56,22 @@ def run() -> None:
 
     models = []
     try:
-        # It seems the DuckDB schema created is <dbt-destination_dataset_name>_<dlt-pipeline-dataset_name>
-        models = dbt.run_all(destination_dataset_name=duckdb_schema)
+        models = dbt.run_all(
+            run_params=(
+                "--fail-fast",
+                "--log-format",
+                "text",
+                "--log-level",
+                "warn",
+                "--log-format-file",
+                "json",
+                "--log-level-file",
+                "info",
+            ),
+            # additional_vars=None,
+            # source_tests_selector=None,
+            destination_dataset_name="silver_layer",
+        )
     except Exception as ex:
         safe_send_telegram_text(
             bot_token=bot_token,

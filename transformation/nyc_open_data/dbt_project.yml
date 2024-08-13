@@ -1,5 +1,5 @@
-name: 'nyc_open_data'
-profile: 'nyc_open_data' # ~/.dbt/profiles.yml
+name: 'NYC_Open_Data'
+profile: 'nyc_open_data' # profiles.yml in this directory, or ~/.dbt/profiles.yml
 version: '1.0.0'
 
 analysis-paths: ["analyses"]
@@ -15,8 +15,6 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  nyc_open_data:
+  nyc_open_data: # This should match the `name` above
     staging:
-      +database: nyc_open_data
-      +schema: silver_layer
-      +materialized: table
+      materialized: table

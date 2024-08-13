@@ -1,0 +1,19 @@
+# dlt defines a profiles.yml file for dbt and uses that when it runs `dbt deps`
+# and `dbt seed` commands.
+# https://github.com/dlt-hub/dlt/blob/devel/dlt/helpers/dbt/profiles.yml
+# When we call `dbt.run_all()` in a dlt pipeline, dlt executes `dbt run` using
+# the profiles.yml defined here.
+nyc_open_data:
+  target: dev # default target
+
+  outputs:
+    dev: # target name
+      type: duckdb
+      schema: silver_layer_nyc
+      path: ~/repos/open-data-projects/assets/data/nyc_open_data.duckdb
+      threads: 1
+
+    # prod:
+    #   type: duckdb
+    #   path: "md:nyc_open_data"
+
