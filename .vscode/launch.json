@@ -21,11 +21,11 @@
       "type": "debugpy",
       "request": "launch",
       "console": "integratedTerminal",
-      "justMyCode": false,
+      "justMyCode": true,
       "program": "${file}"
     },
     {
-      "name": "Attach to debugger",
+      "name": "Attach to debug server",
       "type": "debugpy",
       "request": "attach",
       "connect": { "host": "localhost", "port": 5678 },
