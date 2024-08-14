@@ -68,18 +68,13 @@
     # Format Markdown.
     # markdownlint = true;
 
-    # custom pre-commit hook with SQLFluff
-    sqlfluff = {
+    # custom pre-commit hook
+    sql-format = {
       enable = true;
-      name = "SQLFluff";
-      entry = "sqlfluff --version";
-      # entry = "sqlfluff lint --dialect duckdb";
-      # # https://pre-commit.com/#hooks-files
-      # files = "models\\/.*\\.sql$";
-      # excludes = [];
-      # # https://pre-commit.com/#supported-languages
-      # language = "system";
-      # pass_filenames = false;
+      name = "Format SQL with SQLFluff";
+      entry = "sql-format";
+      # https://pre-commit.com/#supported-languages
+      language = "system";
     };
   };
 
@@ -92,6 +87,8 @@
     pipeline-info.exec = "dlt pipeline $DLT_PIPELINE info";
     pipeline-list.exec = "dlt pipeline --list-pipelines";
     pipeline-trace.exec = "dlt pipeline $DLT_PIPELINE trace";
+    sql-format.exec = "sqlfluff format --dialect duckdb transformation/nyc_open_data/models/";
+    sql-lint.exec = "sqlfluff lint --dialect duckdb --verbose transformation/nyc_open_data/models/";
     transformation.exec = "python transformation/run_pipelines.py";
     versions.exec = ''
       echo "Versions"
