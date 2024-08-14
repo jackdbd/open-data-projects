@@ -86,6 +86,7 @@
     pipeline-failed.exec = "dlt pipeline $DLT_PIPELINE failed-jobs";
     pipeline-info.exec = "dlt pipeline $DLT_PIPELINE info";
     pipeline-list.exec = "dlt pipeline --list-pipelines";
+    pipeline-show.exec = "dlt pipeline $DLT_PIPELINE show";
     pipeline-trace.exec = "dlt pipeline $DLT_PIPELINE trace";
     sql-format.exec = "sqlfluff format --dialect duckdb transformation/nyc_open_data/models/";
     sql-lint.exec = "sqlfluff lint --dialect duckdb --verbose transformation/nyc_open_data/models/";
