@@ -16,9 +16,29 @@ sources:
       - raw
       - source
     tables:
+      - name: film_permits
+        description: '{{ doc("src_film_permits") }}'
+        identifier: film_permits
+        loader: dlt
+        loaded_at_field: ingested_at
+        columns:
+          - name: eventid
+            description: The unique ID of a film permit.
+        tags:
+          - film
+          - mome
+          - movie
+          - permit
+
       - name: service_requests_311
-        description: >
-          NYC Open Data dataset [311 Service Requests from 2010 to Present](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9/about_data).
+        description: '{{ doc("src_service_requests_311") }}'
+        freshness:
+          warn_after:
+            count: 24
+            period: hour
+          error_after:
+            count: 30
+            period: day
         identifier: service_requests_311
         loader: dlt
         loaded_at_field: ingested_at
@@ -31,19 +51,7 @@ sources:
         tags:
           - '311'
           - complaint
-      - name: film_permits
-        description: >
-          NYC Open Data dataset [Film Permits](https://data.cityofnewyork.us/City-Government/Film-Permits/tg4x-b46p/about_data).
-        identifier: film_permits
-        loader: dlt
-        loaded_at_field: ingested_at
-        columns:
-          - name: eventid
-            description: The unique ID of a film permit.
-        tags:
-          - film
-          - movie
-          - permit
+
       - name: staten_island_ferry_ridership_counts
         description: >
           NYC Open Data dataset [Staten Island Ferry Ridership Counts](https://data.cityofnewyork.us/Transportation/Staten-Island-Ferry-Ridership-Counts/6eng-46dm/about_data).

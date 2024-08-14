@@ -37,11 +37,12 @@
   };
 
   # https://devenv.sh/packages/
-  packages = [
-    pkgs.babashka # Clojure interpreter for scripting
-    pkgs.duckdb
-    pkgs.git
-    pkgs.visidata # interactive terminal multitool for tabular data
+  packages = with pkgs; [
+    babashka # Clojure interpreter for scripting
+    duckdb
+    git
+    sqlfluff # SQL linter (supports jinja templating and dbt)
+    visidata # interactive terminal multitool for tabular data
   ];
 
   enterShell = ''
@@ -66,6 +67,20 @@
     black.enable = true;
     # Format Markdown.
     # markdownlint = true;
+
+    # custom pre-commit hook with SQLFluff
+    sqlfluff = {
+      enable = true;
+      name = "SQLFluff";
+      entry = "sqlfluff --version";
+      # entry = "sqlfluff lint --dialect duckdb";
+      # # https://pre-commit.com/#hooks-files
+      # files = "models\\/.*\\.sql$";
+      # excludes = [];
+      # # https://pre-commit.com/#supported-languages
+      # language = "system";
+      # pass_filenames = false;
+    };
   };
 
   # https://devenv.sh/scripts/

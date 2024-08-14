@@ -15,6 +15,6 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  nyc_open_data: # This should match the `name` above
+  NYC_Open_Data: # This should match the `name` above
     staging:
-      materialized: table
+      +materialized: table

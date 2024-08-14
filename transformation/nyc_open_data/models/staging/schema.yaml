@@ -3,8 +3,7 @@ version: 2
 
 models:
   - name: stg_film_permits
-    description: >
-      The cleaned film_permits table.
+    description: '{{ doc("stg_film_permits") }}'
     config:
       materialized: table
     meta:
@@ -12,11 +11,17 @@ models:
       owner: "@giacomo"
     tags:
       - film
+      - mome
       - movie
       - permit
       - silver
     columns:
+      - name: borough
+        description: First borough of activity for the day
+        data_tests:
+          - not_null
       - name: category
+        description: Description of production as selected by permit applicant
         data_tests:
           - not_null
           - accepted_values:
@@ -30,13 +35,26 @@ models:
                 - Television
                 - Theater
                 - WEB
-      - name: eventagency
+      - name: country
+        description: Project origin
+      - name: end_datetime
+        description: Activity scheduled to be completed
         data_tests:
           - not_null
-          # - accepted_values:
-          #     values:
-          #       - Mayor\'s Office of Media & Entertainment # I tried escaping the single quote but it didn't work
-      - name: eventtype
+      - name: entered_on
+        description: Date permit request submitted to MOME
+        data_tests:
+          - not_null
+      - name: event_agency
+        data_tests:
+          - not_null
+      - name: event_id
+        description: Auto-generated unique event identification number.
+        data_tests:
+          - not_null
+          - unique
+      - name: event_type
+        description: '{{ doc("film_permits_event_type") }}'
         data_tests:
           - not_null
           - accepted_values:
@@ -45,11 +63,12 @@ models:
                 - Rigging Permit
                 - Shooting Permit
                 - Theater Load in and Load Outs
-      - name: eventid
-        description: Unique identifier for a film permit.
+      - name: start_datetime
+        description: Activity scheduled to begin
+      - name: zipcode
+        description: First zip code of production activity
         data_tests:
           - not_null
-          - unique
 
   - name: stg_service_requests_311
     description: '{{ doc("stg_service_requests_311") }}'

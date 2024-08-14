@@ -1,0 +1,44 @@
+-- zips_to_drop = [
+--         '02061-0601',
+--         '06890-2101',
+--         '11725-9030',
+--         '11797-1016',
+--         '11804-9005',
+--         '12212-5368',
+--         '19154-3210',
+--         '55438-5908',
+--         '59901-3413',
+--         '61702-3517',
+--         '75007-1958',
+--         '77094-8911',
+--         '90060-0578',
+--         '94566-9057',
+--         '97076-0477',
+--         'DID N',
+--         'HARRISBURG',
+--         'NJ 07'
+--     ]
+
+-- WITH daily_counts AS (
+--     SELECT
+--       date_trunc('day', created_date) AS complaint_date,
+--       borough,
+--       COUNT(*) AS daily_complaints
+--     FROM
+--       data.main.service_requests
+--     GROUP BY
+--       date_trunc('day', created_date),
+--       borough
+--     )
+--     SELECT
+--       complaint_date,
+--       daily_complaints,
+--       borough
+--     FROM
+--       daily_counts
+--     ORDER BY
+--       complaint_date,
+--       daily_complaints DESC
+
+-- This is just to define an actual dbt model. I'll implement the model later.
+select * from {{ source('nyc_open_data', 'film_permits') }} limit 10
